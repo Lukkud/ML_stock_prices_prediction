@@ -12,6 +12,10 @@ class DataPreparation:
         self.df = pd.DataFrame({})
 
     def read_data(self):
+        """
+        Reading data from xlsx or csv file
+        :return: None as method only changes existing dataframe df
+        """
         file_path = os.path.join(self.resources_path, self.file_name)
         if ".csv" in file_path:
             self.df = pd.read_csv(file_path)
@@ -21,6 +25,10 @@ class DataPreparation:
             print("Unsupported file extension")
 
     def data_preparation(self):
+        """
+        Filling gaps in df dataframe and formatting dates in column "Data"
+        :return: None as method only changes existing dataframe df
+        """
         self.df["Data"] = pd.to_datetime(self.df["Data"], format='%Y-%m-%d')
         date_index = pd.date_range(start=self.df["Data"].min(), end=self.df["Data"].max(), freq='D')
         self.df = self.df.set_index('Data')
@@ -28,6 +36,11 @@ class DataPreparation:
 
     @staticmethod
     def print_correlation_matrix(df):
+        """
+        Creates correlation matrix for a given dataframe and plots it using matplotlib and seaborn
+        :param df: Dataframe (each column must be numeric type!)
+        :return: plot of correlation matrix
+        """
         corrMatrix = df.corr()
         plt.figure(figsize=(15, 10))
         sn.heatmap(corrMatrix, annot=True)
@@ -37,3 +50,4 @@ if __name__ == "__main__":
     x = DataPreparation("wig20_d.csv")
     x.read_data()
     x.data_preparation()
+    x.print_correlation_matrix(x.df.drop(columns=["Otwarcie", "Najwyzszy", "Najnizszy", "Zamkniecie", "Wolumen"]))
