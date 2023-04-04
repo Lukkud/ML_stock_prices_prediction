@@ -1,14 +1,16 @@
 import os
+import argparse
 import pandas as pd
-import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sn
+from config import Config
 
 
 class DataPreparation:
-    def __init__(self, file_name):
+    def __init__(self, file_name, config_file):
         self.file_name = file_name
-        self.resources_path = r"D:\Studia II stopien\IV semestr\Praca\Dane"
+        self.config = config_file
+        self.resources_path = self.config.parameter("resources_path")
         self.df = pd.DataFrame({})
 
     def read_data(self):
@@ -24,15 +26,18 @@ class DataPreparation:
         else:
             print("Unsupported file extension")
 
-    def data_preparation(self):
+    def data_formatting(self, filling_gaps=False):
         """
         Filling gaps in df dataframe and formatting dates in column "Data"
         :return: None as method only changes existing dataframe df
         """
         self.df["Data"] = pd.to_datetime(self.df["Data"], format='%Y-%m-%d')
-        date_index = pd.date_range(start=self.df["Data"].min(), end=self.df["Data"].max(), freq='D')
-        self.df = self.df.set_index('Data')
-        self.df = self.df.reindex(index=date_index, method="bfill")
+        if filling_gaps:
+            date_index = pd.date_range(start=self.df["Data"].min(), end=self.df["Data"].max(), freq='D')
+            self.df = self.df.set_index('Data')
+            self.df = self.df.reindex(index=date_index, method="bfill")
+        else:
+            self.df = self.df.set_index('Data')
 
     @staticmethod
     def print_correlation_matrix(df):
@@ -41,13 +46,7 @@ class DataPreparation:
         :param df: Dataframe (each column must be numeric type!)
         :return: plot of correlation matrix
         """
-        corrMatrix = df.corr()
+        corr_matrix = df.corr()
         plt.figure(figsize=(15, 10))
-        sn.heatmap(corrMatrix, annot=True)
+        sn.heatmap(corr_matrix, annot=True)
         plt.show()
-
-if __name__ == "__main__":
-    x = DataPreparation("wig20_d.csv")
-    x.read_data()
-    x.data_preparation()
-    x.print_correlation_matrix(x.df.drop(columns=["Otwarcie", "Najwyzszy", "Najnizszy", "Zamkniecie", "Wolumen"]))
