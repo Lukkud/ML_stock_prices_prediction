@@ -22,10 +22,10 @@ class MainControl:
         # DataPreparation.print_correlation_matrix(self.preparation.df.drop(["Wolumen", "Zamkniecie", "Otwarcie", "Najwyzszy", "Najnizszy"], axis=1))
         DataPreparation.print_correlation_matrix(self.preparation.df)
 
-        # self.model_estimation(RandomForestClassifier(), "Random Forest", self.config.parameter("rf_param_grid"), 5)
-        # self.model_estimation(SVC(kernel='linear'), "SVC", self.config.parameter("svc_param_grid"), 5)
-        # self.model_estimation(LogisticRegression(max_iter=1000), "Logistic regression", self.config.parameter("lr_param_grid"), 5)
-        # self.model_estimation(BaggingClassifier(), "Bagging", cv=10)
+        self.model_estimation(RandomForestClassifier(), "Random Forest", self.config.parameter("rf_param_grid"), 5)
+        self.model_estimation(SVC(kernel='linear'), "SVC", self.config.parameter("svc_param_grid"), 5)
+        self.model_estimation(LogisticRegression(max_iter=1000), "Logistic regression", self.config.parameter("lr_param_grid"), 5)
+        self.model_estimation(BaggingClassifier(), "Bagging", cv=10)
         self.model_estimation(AdaBoostClassifier(), "AdaBoost", self.config.parameter("adaboost_grid"), cv=5)
 
     def model_estimation(self, model, model_name, param_grid={}, cv=None):

@@ -3,10 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sn
 from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
 import ta
 from ta import volume as ta_volume
 from ta import trend as ta_trend
 from ta import momentum as ta_momentum
+from ta import volatility as ta_volatility
 
 
 class DataPreparation:
@@ -15,6 +17,7 @@ class DataPreparation:
         self.config = config_file
         self.resources_path = self.config.parameter("resources_path")
         self.test_size = self.config.parameter("test_size")
+        self.shift = self.config.parameter("shift")
         self.df = pd.DataFrame({})
 
         self.read_data()
@@ -22,6 +25,8 @@ class DataPreparation:
         self.add_ta_indexes()
 
         self.X = self.df.drop('y', axis=1)
+        scaler = preprocessing.StandardScaler()
+        self.X = pd.DataFrame(scaler.fit_transform(self.X))
         self.y = self.df['y']
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y,
                                                                                 test_size=self.test_size,
@@ -55,6 +60,7 @@ class DataPreparation:
             self.df = self.df.set_index('Data')
         self.df["y"] = self.df["Zamkniecie"] - self.df["Zamkniecie"].shift(1)
         self.df["y"] = self.df.apply(lambda row: 1 if row["y"] >= 0 else 0, axis=1)
+        self.df["y"] = self.df['y'].shift(self.shift)
 
     @staticmethod
     def print_correlation_matrix(df):
@@ -64,65 +70,42 @@ class DataPreparation:
         :return: plot of correlation matrix
         """
         corr_matrix = df.corr()
+        # corr_matrix.to_excel('D:\Pliki_latex\Praca_magisterska\corr_matrix.xlsx')
         plt.figure(figsize=(30, 20))
         sn.heatmap(corr_matrix, annot=True)
         plt.show()
 
     def add_ta_indexes(self):
-        # self.df["OBV"] = ta_volume.on_balance_volume(close=self.df["Zamkniecie"],
-        #                                              volume=self.df["Wolumen"])
-        #
-        # self.df["ACC_dist_line"] = ta_volume.acc_dist_index(close=self.df["Zamkniecie"],
-        #                                                     volume=self.df["Wolumen"],
-        #                                                     high=self.df["Najwyzszy"],
-        #                                                     low=self.df["Najnizszy"])
+        self.df["ACC_dist_line"] = ta_volume.acc_dist_index(close=self.df["Zamkniecie"],
+                                                            volume=self.df["Wolumen"],
+                                                            high=self.df["Najwyzszy"],
+                                                            low=self.df["Najnizszy"])
 
         self.df["ADX"] = ta_trend.adx(close=self.df["Zamkniecie"],
                                       high=self.df["Najwyzszy"],
                                       low=self.df["Najnizszy"],
                                       window=20)
 
-        aroon = ta_trend.AroonIndicator(close=self.df["Zamkniecie"],
-                                        window=20)
-        self.df["Aroon_indicator"] = aroon.aroon_indicator()
-
         self.df["RSI"] = ta_momentum.rsi(close=self.df["Zamkniecie"], window=20)
-
         self.df["ROC"] = ta_momentum.roc(close=self.df["Zamkniecie"], window=20)
-
         self.df["SMA"] = ta_trend.sma_indicator(close=self.df["Zamkniecie"],
                                                 window=10)
-        # self.df["EMA"] = ta_trend.ema_indicator(close=self.df["Zamkniecie"],
-        #                                         window=10)
-        # self.df["WMA"] = ta_trend.wma_indicator(close=self.df["Zamkniecie"],
-        #                                         window=10)
-
-        # self.df["CCI"] = ta_trend.cci(close=self.df["Zamkniecie"],
-        #                               high=self.df["Najwyzszy"],
-        #                               low=self.df["Najnizszy"],
-        #                               window=10)
-        # self.df["PSI"] = ta_momentum.ppo(close=self.df["Zamkniecie"])
-
+        self.df["CCI"] = ta_trend.cci(close=self.df["Zamkniecie"],
+                                      high=self.df["Najwyzszy"],
+                                      low=self.df["Najnizszy"],
+                                      window=10)
         self.df["Stoch"] = ta_momentum.stoch(high=self.df["Najwyzszy"],
                                              low=self.df["Najnizszy"],
                                              close=self.df["Zamkniecie"])
-
-        # self.df["TSI"] = ta_momentum.tsi(close=self.df["Zamkniecie"])
-
-        self.df["UltInd"] = ta_momentum.ultimate_oscillator(high=self.df["Najwyzszy"],
-                                                            low=self.df["Najnizszy"],
-                                                            close=self.df["Zamkniecie"])
-
         self.df["MACD"] = ta_trend.macd(close=self.df["Zamkniecie"])
+        self.df["Bollinger_hi"] = ta_volatility.bollinger_hband_indicator(close=self.df["Zamkniecie"])
+        self.df["Bollinger_li"] = ta_volatility.bollinger_lband_indicator(close=self.df["Zamkniecie"])
+        self.df["Keltner_hi"] = ta_volatility.keltner_channel_hband_indicator(close=self.df["Zamkniecie"],
+                                                                              high=self.df["Najwyzszy"],
+                                                                              low=self.df["Najnizszy"])
+        self.df["Keltner_li"] = ta_volatility.keltner_channel_lband_indicator(close=self.df["Zamkniecie"],
+                                                                              high=self.df["Najwyzszy"],
+                                                                              low=self.df["Najnizszy"])
 
         self.df = self.df.drop(["Wolumen", "Zamkniecie", "Otwarcie", "Najwyzszy", "Najnizszy"], axis=1)
-
         self.df = self.df.dropna()
-
-        # tmp_df = ta.add_all_ta_features(self.df,
-        #                                 open="Otwarcie",
-        #                                 close="Zamkniecie",
-        #                                 volume="Wolumen",
-        #                                 high="Najwyzszy",
-        #                                 low="Najnizszy")
-        # self.df = pd.concat([self.df, tmp_df])
