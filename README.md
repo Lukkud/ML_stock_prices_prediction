@@ -23,9 +23,27 @@ Struktura pracy prezentuje się następująco. W pierwszym rozdziale zaprezentow
 ## Uruchamianie
 
 ## Wyniki
-Wszystkie wyniki zostały zebrane w pracy magisterskiej dostępnej pod poniższym adresem
+W pracy testowano 6 modeli dla 6 zbiorów danych zawierających dane dzienne indeksów giełdowych. 4 modele pochodziły z grupy modeli drzew decyzyjnych - podstawowy model drzew decyzyjnych, bagging, lasy losowe oraz boosting. Dodatkowo przetestowano również model regresji logistycznej oraz maszyny wektorów nośnych. W poniższych tabelach  zaprezentowano końcowe wskaźniki trafności dla każdego z modeli z wyszczególnieniem testowanych indeksów. 
 
-[Praca magisterska](https://github.com/Lukkud/Praca_magisterska/blob/master/Praca_magisterska.pdf)
+![Alt text](https://github.com/Lukkud/Praca_magisterska/blob/main/src/wyniki_accuracy_1horyzont.png)
+
+Bazując na uzyskanych wynikach trafności można stwierdzić, że najlepszym modelem do predykcji zmian cen akcji na 1 sesję do przodu jest regresja logistyczna - średnia trafność na poziomie 0,709. Nieznacznie gorsze okazały się modele SVM oraz bagging - odpowiednio 0,708 i 0,706. Gorzej spisały się modele lasów losowych i boostingu, a zdecydowanie najsłabszym był podstawowy model drzew decyzyjnych. Można zauważyć również, że najlepsze prognozy uzyskano dla indeksu S\&P 500, co jest spodziewnym rezultatem biorąc pod uwagę, że to na danych tego indeksu strojono hiperparametry modeli. Najniższe wskaźniki trafności uzyskano dla DAX i WIG 20. Ciekawe wnioski daje również analiza pojedynczych wartości dla poszczególnych modeli. Model SVM uzyskał najwyższą trafność dla indeksu BSE Sensex 30, ale jednocześnie jedną z najniższych wartości dla indeksów DAX oraz UK 100. Można więc stwierdzić, że SVM cechował się wysoką czułością (wariancją). Zupełnie odwrotnie jest dla modeli regresji logistycznej oraz baggingu, które były bardzo stabilne. 
+
+Wszystkie modele sprawdzono również pod kątem prognozowania zmian cen akcji na dwie sesje do przodu. W poniższej tabeli zaprezentowano końcowe wskaźniki trafności dla każdego z modeli z wyszczególnieniem testowanych indeksów. 
+
+![Alt text](https://github.com/Lukkud/Praca_magisterska/blob/main/src/wyniki_accuracy_2horyzont.png)
+
+Również przy dwusesyjnym horyzoncie predykcyjnym najlepszym modelem okazała sie regresja logistyczna ze średnią trafnością na poziomie 0,656. Wysokie wyniki odnotowano również dla modelu lasów losowych i baggingu - odpowiednio 0,645 i 0,651. Najniższe trafności uzyskano dla drzew decyzyjnych. Jeśli chodzi o wskazania dla poszczególnych indeksów to najlepiej w tej kwestii modele prognozowały dla indeksu BSE Sensex 30. Najgorzej w zestawieniu wypada DAX. Zarówno regresja logistyczna jak i bagging są bardzo stabilnymi modelami. 
+
+Dla modeli przewidujących na 1 sesję do przodu otrzymano średnią trafność na poziomie odpowiednio 0,699. Dla horyzontu dwusesyjnego było to już 0,637. Trafność jest więc niższa o 6 punktów procentowych. Trzeba jednak przyznać, że daleko tym wartościom do wyników całkowicie losowych i badane modele mogą być pomocne w kontekście decyzji o kupnie lub sprzedaży. Ciekawa mogłaby być tutaj również analiza dla dłuższego okna predykcji, jednak to wykracza poza zakres tej pracy.
+
+Jeśli chodzi o wpływ poszczególnych zmiennych na zdolności prognostyczne to wykorzystano do tego metodę permutacyjnej oceny istotności. Dla wszystkich modeli z wyjątkiem SVM najistotniejsze okazały się wskazania oscylatora stochastycznego. Usunięcie tej zmiennej powoduje spadek trafności o 0,12 - 0,28. Jednocześnie dla tej zmiennej odnotowano też największy rozrzut danych, o czym świadczą długości pudełek i wąsów na wykresach. Mniej istotnymi zmiennymi okazały się CCI, MACD oraz RSI. Ostatnia z wymienionych co prawda była najistotniejsza dla SVM, ale dla pozostałych modeli permutacyjna ocena istotności wskazuje na spadek trafności o maksymalnie 0,15 w jej przypadku. Jeśli chodzi o CCI oraz MACD to okazały się one jednymi z najistotniejszych zmiennych w każdym z modeli notując spadek trafności nawet o 0,15, po wykonaniu permutacji na kolumnach z wartościami dla tych zmiennych. Warto odnotować, że binarne zmienne wskazujące na przekroczenie granic wstęgi Bollingera w niskim stopniu wpływały na zdolności predykcyjne badanych modeli. Wyjątkiem jest regresja logistyczna, dla której permutacje wykonane na tej zmiennej powodowały spadek trafności nawet o 0,05. Podobne wnioski nasuwają się po analizie spadków wartości dla zmiennych EMA oraz ADX. Ciekawy jest jednak przypadek modelu bagging. Po wykonaniu permutacji dla tych dwóch zmiennych wskaźnik trafności średnio ulegał wręcz nieznacznej poprawie. Poniżej zaprezentowano przykładowy wykres permutacyjnej istotności zmiennych dla modelu Bagging. Analizę przeprowadzono na zbiorze testowym dla danych indeksu S&P 500.
+
+![Alt text](https://github.com/Lukkud/Praca_magisterska/blob/main/src/Logistic_regression_permutation_importance_spx.png)
+
+Całą analizę i wyniki przedstawiono w pracy magisterskiej dostępnej pod poniższym adresem
+
+[Praca magisterska](https://github.com/Lukkud/Praca_magisterska/blob/main/src/Praca_Łukasz_Chuchra.pdf)
 
 ## Status
 Projekt zakończony
