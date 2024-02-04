@@ -1,6 +1,4 @@
-# Praca_magisterska
-
-# Analiza serii pików dyfrakcyjnych w kwazikryształach
+# Zastosowanie uczenia maszynowego do prognozowania zmian cen akcji
 
 ## Spis treści
 * [Wprowadzenie](#Wprowadzenie)
