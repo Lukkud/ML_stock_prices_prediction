@@ -1,33 +1,43 @@
 import os
 import pandas as pd
+from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sn
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
-import ta
-from ta import volume as ta_volume
 from ta import trend as ta_trend
 from ta import momentum as ta_momentum
 from ta import volatility as ta_volatility
 
 
+DIR_PATH = Path(os.path.abspath(__file__)).parents[0]
+PLOT_PATH = os.path.join(DIR_PATH, 'plot_files')
+DATA_PATH = os.path.join(DIR_PATH, 'data_files')
+Path(PLOT_PATH).mkdir(parents=True, exist_ok=True)
+Path(DATA_PATH).mkdir(parents=True, exist_ok=True)
+
 class DataPreparation:
     def __init__(self, file_name, config_file):
         self.file_name = file_name
         self.config = config_file
-        self.resources_path = self.config.parameter("resources_path")
+        self.resources_path = DATA_PATH
         self.test_size = self.config.parameter("test_size")
         self.shift = self.config.parameter("shift")
         self.df = pd.DataFrame({})
-
         self.read_data()
         self.data_formatting(self.config.parameter("filling_gaps"))
         self.add_ta_indexes()
-
         self.X = self.df.drop('y', axis=1)
-        scaler = preprocessing.StandardScaler()
-        self.X = pd.DataFrame(scaler.fit_transform(self.X))
         self.y = self.df['y']
+
+        scaler = preprocessing.StandardScaler()
+        col_scaler_list = ["ADX", "RSI", "ROC", "EMA", "CCI", "Oscylator stoch.", "MACD"]
+        col_scaler_dict = self.X[col_scaler_list].columns
+        self.X[["ADX", "RSI", "ROC", "EMA", "CCI", "Oscylator stoch.", "MACD"]] = \
+            pd.DataFrame(scaler.fit_transform(self.X[["ADX", "RSI", "ROC", "EMA", "CCI", "Oscylator stoch.", "MACD"]]),
+                         index=self.X.index,
+                         columns=col_scaler_dict)
+
         self.X_train, self.X_test, self.y_train, self.y_test = train_test_split(self.X, self.y,
                                                                                 test_size=self.test_size,
                                                                                 random_state=290392)
@@ -70,42 +80,30 @@ class DataPreparation:
         :return: plot of correlation matrix
         """
         corr_matrix = df.corr()
-        # corr_matrix.to_excel('D:\Pliki_latex\Praca_magisterska\corr_matrix.xlsx')
+        plt.rcParams['font.size'] = 24
+        corr_matrix.to_excel(os.path.join(DATA_PATH, f'corr_matrix.xlsx'))
         plt.figure(figsize=(30, 20))
         sn.heatmap(corr_matrix, annot=True)
+        plt.xticks(rotation=45)
+        plt.savefig(os.path.join(PLOT_PATH, f'corr_matrix.png'), format='png')
         plt.show()
 
     def add_ta_indexes(self):
-        self.df["ACC_dist_line"] = ta_volume.acc_dist_index(close=self.df["Zamkniecie"],
-                                                            volume=self.df["Wolumen"],
-                                                            high=self.df["Najwyzszy"],
-                                                            low=self.df["Najnizszy"])
-
         self.df["ADX"] = ta_trend.adx(close=self.df["Zamkniecie"],
                                       high=self.df["Najwyzszy"],
-                                      low=self.df["Najnizszy"],
-                                      window=20)
-
-        self.df["RSI"] = ta_momentum.rsi(close=self.df["Zamkniecie"], window=20)
-        self.df["ROC"] = ta_momentum.roc(close=self.df["Zamkniecie"], window=20)
-        self.df["SMA"] = ta_trend.sma_indicator(close=self.df["Zamkniecie"],
-                                                window=10)
+                                      low=self.df["Najnizszy"])
+        self.df["RSI"] = ta_momentum.rsi(close=self.df["Zamkniecie"])
+        self.df["ROC"] = ta_momentum.roc(close=self.df["Zamkniecie"])
+        self.df["EMA"] = ta_trend.ema_indicator(close=self.df["Zamkniecie"])
         self.df["CCI"] = ta_trend.cci(close=self.df["Zamkniecie"],
                                       high=self.df["Najwyzszy"],
-                                      low=self.df["Najnizszy"],
-                                      window=10)
-        self.df["Stoch"] = ta_momentum.stoch(high=self.df["Najwyzszy"],
-                                             low=self.df["Najnizszy"],
-                                             close=self.df["Zamkniecie"])
+                                      low=self.df["Najnizszy"])
+        self.df["Oscylator stoch."] = ta_momentum.stoch(high=self.df["Najwyzszy"],
+                                                        low=self.df["Najnizszy"],
+                                                        close=self.df["Zamkniecie"])
         self.df["MACD"] = ta_trend.macd(close=self.df["Zamkniecie"])
-        self.df["Bollinger_hi"] = ta_volatility.bollinger_hband_indicator(close=self.df["Zamkniecie"])
-        self.df["Bollinger_li"] = ta_volatility.bollinger_lband_indicator(close=self.df["Zamkniecie"])
-        self.df["Keltner_hi"] = ta_volatility.keltner_channel_hband_indicator(close=self.df["Zamkniecie"],
-                                                                              high=self.df["Najwyzszy"],
-                                                                              low=self.df["Najnizszy"])
-        self.df["Keltner_li"] = ta_volatility.keltner_channel_lband_indicator(close=self.df["Zamkniecie"],
-                                                                              high=self.df["Najwyzszy"],
-                                                                              low=self.df["Najnizszy"])
+        self.df["Bollinger - gg"] = ta_volatility.bollinger_hband_indicator(close=self.df["Zamkniecie"])
+        self.df["Bollinger - dg"] = ta_volatility.bollinger_lband_indicator(close=self.df["Zamkniecie"])
 
         self.df = self.df.drop(["Wolumen", "Zamkniecie", "Otwarcie", "Najwyzszy", "Najnizszy"], axis=1)
         self.df = self.df.dropna()
