@@ -15,6 +15,8 @@ Celem pracy jest zbadanie, czy metody uczenia maszynowego mogą być użyteczne 
 
 Struktura pracy prezentuje się następująco. W pierwszym rozdziale zaprezentowano opis literatury naukowej z zakresu wykorzystania uczenia maszynowego do prognozowania cen akcji. W drugim rozdziale opisana została metodyka badań, a także przedstawiono teoretyczne opisy  modeli wybranych do estymacji. W kolejnym rozdziale zaprezentowano sposób przygotowania danych, a także zawarto opis wskaźników analizy technicznej wykorzystanych w pracy. W czwartym rozdziale  zaprezentowane zostały wyniki każdego z modeli, a także wybrano najlepszy z nich na podstawie m.in. wskazania trafności prognoz. Na końcu przedstawiono również podsumowanie wyników pracy oraz dalsze plany rozwoju.
 
+[Pełna praca magisterska](https://github.com/Lukkud/Praca_magisterska/blob/main/src/Praca_Łukasz_Chuchra.pdf)
+
 ## Technologie 
 * Python 3.9 (użyte biblioteki: Numpy, Matplotlib, scikit-learn, Seaborn)
 
